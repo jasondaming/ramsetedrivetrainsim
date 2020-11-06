@@ -89,7 +89,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-
+    m_robotDrive.resetEncoders();
     // Create a voltage constraint to ensure we don't accelerate too fast
     var autoVoltageConstraint =
         new DifferentialDriveVoltageConstraint(
@@ -120,6 +120,14 @@ public class RobotContainer {
       trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
     } catch (IOException ex) {
       DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
+    }
+
+    for (int i = 0; i < trajectory.getStates().size(); ++i) {
+      var s = trajectory.getStates().get(i);
+      trajectory.getStates().set(i, new Trajectory.State(s.timeSeconds, 
+        s.velocityMetersPerSecond, s.accelerationMetersPerSecondSq,
+        new Pose2d(s.poseMeters.getX(), s.poseMeters.getY() + 8.2296, s.poseMeters.getRotation()), s.curvatureRadPerMeter));
+    
     }
 
     // An example trajectory to follow.  All units in meters.
